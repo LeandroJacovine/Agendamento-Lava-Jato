@@ -3,44 +3,44 @@ import pandas as pd
 from datetime import datetime, time, timedelta
 import os
 
-# Nome do arquivo Excel
+# === CONFIGURAÇÕES FIXAS ===
 arquivo_excel = 'agenda_lava_jato.xlsx'
-
-# Senha do administrador
 senha_admin = "admin123"
-
-# Endereço da loja
 endereco_loja = "Av. José Faria da Rocha, 3772 - Eldorado - Contagem - MG"
+servico = "LAVAGEM SIMPLES"
 
-# Função para criar o arquivo Excel se não existir
+# === PALETA DE CORES ===
+COR_PRIMARIA = "#2E86AB"
+COR_SECUNDARIA = "#F18F01"
+COR_TERCIARIA = "#C73E1D"
+COR_FUNDO = "#F5F5F5"
+COR_TEXTO = "#333333"
+
+# === FUNÇÕES UTILITÁRIAS ===
 def criar_arquivo_excel():
     if not os.path.exists(arquivo_excel):
         df = pd.DataFrame(columns=["Data", "Horário", "Nome", "CPF", "Telefone", "Placa", "Modelo", "Serviço"])
         df.to_excel(arquivo_excel, index=False)
 
-# Função para carregar a agenda
 def carregar_agenda():
     if os.path.exists(arquivo_excel):
         df = pd.read_excel(arquivo_excel, dtype=str)
         if not df.empty:
             df['Data_Hora'] = pd.to_datetime(df['Data'] + ' ' + df['Horário'], format='%d/%m/%Y %H:%M')
             df = df.sort_values('Data_Hora').drop('Data_Hora', axis=1)
-            colunas_ordenadas = ["Data", "Horário", "Nome", "CPF", "Telefone", "Placa", "Modelo", "Serviço"]
-            df = df[colunas_ordenadas]
+            df = df[["Data", "Horário", "Nome", "CPF", "Telefone", "Placa", "Modelo", "Serviço"]]
         return df
     else:
         return pd.DataFrame(columns=["Data", "Horário", "Nome", "CPF", "Telefone", "Placa", "Modelo", "Serviço"])
 
-# Função para salvar agendamento
 def salvar_agendamento(nome, cpf, telefone, placa, modelo, servico, data, horario):
     df = carregar_agenda()
-    novo_agendamento = pd.DataFrame([[data, horario, nome, cpf, telefone, placa, modelo, servico]],
-                                    columns=["Data", "Horário", "Nome", "CPF", "Telefone", "Placa", "Modelo", "Serviço"])
-    df = pd.concat([df, novo_agendamento], ignore_index=True)
+    novo = pd.DataFrame([[data, horario, nome, cpf, telefone, placa, modelo, servico]],
+                        columns=["Data", "Horário", "Nome", "CPF", "Telefone", "Placa", "Modelo", "Serviço"])
+    df = pd.concat([df, novo], ignore_index=True)
     df.to_excel(arquivo_excel, index=False)
     st.success(f"✅ Agendamento salvo com sucesso para {data} às {horario}!")
 
-# Função para cancelar agendamento
 def cancelar_agendamento(cpf_cliente):
     df = carregar_agenda()
     df_filtrado = df[df['CPF'] != cpf_cliente]
@@ -50,207 +50,170 @@ def cancelar_agendamento(cpf_cliente):
         df_filtrado.to_excel(arquivo_excel, index=False)
         st.success("✅ Agendamento cancelado com sucesso!")
 
-# Configuração da página
-st.set_page_config(page_title="LAVA JATO - AUTO TRUCK ELDORADO", layout="wide")
-
-# Estilização personalizada
+# === ESTILO PERSONALIZADO ===
 def custom_style():
     st.markdown(f"""
         <style>
             body {{
-                background-color: #f5f5f5;
-                font-family: Arial, sans-serif;
+                background-color: {COR_FUNDO};
+                color: {COR_TEXTO};
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             }}
-            header {{
+            .header {{
                 background-color: #FFD700;
-                padding: 15px 0;
-                text-align: center;
-                margin-bottom: 30px;
-            }}
-            header h1 {{
                 color: black;
-                margin: 0;
-                font-weight: bold;
-                font-size: 28px;
-            }}
-            header h3 {{
-                color: black;
-                margin: 0;
-                font-size: 16px;
-                margin-top: 5px;
-            }}
-            .stApp {{
-                background-color: #f5f5f5;
-                max-width: 100% !important;
-                padding: 0 20px;
-            }}
-            .block-container {{
-                background-color: white;
-                padding: 2rem;
-                border-radius: 15px;
-                margin: 1rem auto;
+                padding: 1.5rem;
+                border-radius: 0 0 15px 15px;
+                margin-bottom: 2rem;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                text-align: center;
             }}
-            .stButton button {{
-                background-color: #FFD700;
-                color: black;
+            .card-title {{
+                color: {COR_PRIMARIA};
+                font-size: 1.3rem;
+                margin-bottom: 1rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }}
+            .stButton>button {{
+                background-color: {COR_PRIMARIA};
+                color: white;
                 border-radius: 8px;
-                padding: 0.5rem 1rem;
-                margin-top: 0.5rem;
+                padding: 0.7rem 1.5rem;
                 border: none;
-                font-weight: bold;
+                font-weight: 600;
                 width: 100%;
             }}
-            .stButton button:hover {{
-                background-color: #e6c200;
-                color: black;
-            }}
-            .form-container {{
-                margin-bottom: 30px;
-            }}
-            table {{
-                width: 100%;
-                border-collapse: collapse;
-            }}
-            th {{
-                background-color: #FFD700 !important;
-                color: black !important;
-                text-align: left !important;
-                padding: 8px !important;
-            }}
-            td {{
-                padding: 8px !important;
-                border-bottom: 1px solid #ddd !important;
-            }}
-            tr:hover {{
-                background-color: #f5f5f5 !important;
+            .stButton>button:hover {{
+                background-color: {COR_SECUNDARIA};
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             }}
         </style>
     """, unsafe_allow_html=True)
 
+# === CONFIG INICIAL ===
+st.set_page_config("LAVA JATO - AUTO TRUCK ELDORADO", layout="wide", page_icon="🚗")
 custom_style()
-
-# Inicialização do arquivo
 criar_arquivo_excel()
 
-# Cabeçalho
-st.markdown(f'<header><h1>🚗 LAVA JATO - AUTO TRUCK ELDORADO</h1><h3>{endereco_loja}</h3></header>', unsafe_allow_html=True)
+# === CABEÇALHO ===
+st.markdown(f"""
+    <div class="header">
+        <h1>🚗 LAVA JATO - AUTO TRUCK ELDORADO</h1>
+        <h3>{endereco_loja}</h3>
+    </div>
+""", unsafe_allow_html=True)
 
-# Variáveis de controle de estado
-if 'horario_selecionado' not in st.session_state:
-    st.session_state['horario_selecionado'] = None
-
-# Layout em colunas
-col1, col2 = st.columns([2, 3])
+# === INTERFACE PRINCIPAL ===
+col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
-    # Formulário de agendamento
-    with st.form("form_agendamento"):
-        st.header("📅 Novo Agendamento")
+    with st.container():
+        st.markdown('<div class="card-title">📅 Novo Agendamento</div>', unsafe_allow_html=True)
+        with st.form("form_agendamento", clear_on_submit=True):
+            nome = st.text_input("Nome do Associado(a)*")
+            cpf = st.text_input("CPF do Associado(a)*")
+            telefone = st.text_input("Telefone*")
+            placa = st.text_input("Placa do Veículo*").upper()
+            modelo = st.text_input("Modelo do Veículo*")
+            st.markdown(f"**Serviço:** {servico}")
+            data = st.date_input("Data do Agendamento*", min_value=datetime.today())
 
-        nome = st.text_input("Nome do Associado(a)*")
-        cpf = st.text_input("CPF do Associado(a)*")
-        telefone = st.text_input("Telefone*")
-        placa = st.text_input("Placa do Veículo*").upper()
-        modelo = st.text_input("Modelo do Veículo*")
-        servico = "LAVAGEM SIMPLES"
-        st.text_input("Serviço", value=servico, disabled=True)
+            # Geração de horários disponíveis
+            inicio, fim = time(8, 0), time(16, 30)
+            horario_atual = datetime.combine(datetime.today(), inicio)
+            todos_horarios = []
+            while horario_atual.time() <= fim:
+                todos_horarios.append(horario_atual.strftime("%H:%M"))
+                horario_atual += timedelta(minutes=30)
 
-        data = st.date_input("Data do Agendamento*", format="DD/MM/YYYY")
+            data_str = data.strftime("%d/%m/%Y")
+            df_agenda = carregar_agenda()
+            ocupados = df_agenda[df_agenda['Data'] == data_str]['Horário'].tolist()
+            disponiveis = [h for h in todos_horarios if h not in ocupados]
 
-        # Gerar horários disponíveis
-        inicio = time(8, 0)
-        fim = time(16, 30)
-        horario_atual = datetime.combine(datetime.today(), inicio)
-        todos_horarios = []
-        while horario_atual.time() <= fim:
-            todos_horarios.append(horario_atual.strftime("%H:%M"))
-            horario_atual += timedelta(minutes=30)
-
-        data_str = data.strftime("%d/%m/%Y")
-        df_agenda = carregar_agenda()
-        horarios_ocupados = df_agenda[df_agenda['Data'] == data_str]['Horário'].tolist()
-        horarios_disponiveis = [h for h in todos_horarios if h not in horarios_ocupados]
-
-        if horarios_disponiveis:
-            horario = st.selectbox("Horário*", horarios_disponiveis, key=f"horario_{data_str}")
-        else:
-            horario = None
-            st.warning("⚠️ Todos os horários estão ocupados para esta data. Por favor, escolha outra.")
-
-        submit = st.form_submit_button("Agendar")
-
-        if submit:
-            campos_obrigatorios = {
-                "Nome": nome,
-                "CPF": cpf,
-                "Telefone": telefone,
-                "Placa": placa,
-                "Modelo": modelo
-            }
-
-            campos_vazios = [campo for campo, valor in campos_obrigatorios.items() if not valor]
-
-            if campos_vazios:
-                st.error(f"❌ Por favor, preencha todos os campos obrigatórios: {', '.join(campos_vazios)}")
-            elif not horario:
-                st.error("❌ Por favor, selecione um horário disponível.")
+            if disponiveis:
+                horario = st.selectbox("Horário*", disponiveis, key=f"horario_{data_str}")
             else:
-                salvar_agendamento(nome, cpf, telefone, placa, modelo, servico, data_str, horario)
-                # Limpar estado após agendar
-                st.experimental_rerun()
+                horario = None
+                st.warning("⚠️ Todos os horários estão ocupados para esta data. Por favor, escolha outra.")
+                if st.button("Escolher outro dia"):
+                    st.rerun()
 
-    # Cancelar agendamento
-    with st.form("form_cancelar"):
-        st.header("❌ Cancelar Agendamento")
-        cpf_cancelar = st.text_input("CPF do Cliente para Cancelar*")
-        submit_cancelar = st.form_submit_button("Cancelar Agendamento")
+            submit = st.form_submit_button("Agendar")
 
-        if submit_cancelar:
-            if not cpf_cancelar:
-                st.error("❌ Por favor, informe o CPF do cliente.")
-            else:
-                cancelar_agendamento(cpf_cancelar)
+            if submit:
+                campos = {"Nome": nome, "CPF": cpf, "Telefone": telefone, "Placa": placa, "Modelo": modelo}
+                vazios = [campo for campo, valor in campos.items() if not valor]
+                if vazios:
+                    st.error(f"❌ Preencha todos os campos obrigatórios: {', '.join(vazios)}")
+                elif not horario:
+                    st.error("❌ Selecione um horário disponível.")
+                else:
+                    salvar_agendamento(nome, cpf, telefone, placa, modelo, servico, data_str, horario)
+                    st.balloons()
+                    st.rerun()
+
+    with st.container():
+        st.markdown('<div class="card-title">❌ Cancelar Agendamento</div>', unsafe_allow_html=True)
+        with st.form("form_cancelar"):
+            cpf_cancelar = st.text_input("CPF para Cancelamento*")
+            if st.form_submit_button("Cancelar Agendamento"):
+                if not cpf_cancelar:
+                    st.error("❌ Informe o CPF do cliente.")
+                else:
+                    cancelar_agendamento(cpf_cancelar)
 
 with col2:
-    # Acesso do administrador
-    with st.expander("🔒 Acesso do Administrador", expanded=True):
-        senha_digitada = st.text_input("Digite a senha do administrador:", type="password")
-        admin_logado = senha_digitada == senha_admin
-
-        if admin_logado:
-            st.success("✅ Acesso administrativo concedido")
-
-            st.header("📖 Agenda")
-            data_filtro = st.date_input("Filtrar por data:", format="DD/MM/YYYY")
-
+    with st.expander("🔒 Área do Administrador", expanded=False):
+        senha = st.text_input("Senha do administrador:", type="password")
+        if senha == senha_admin:
+            st.success("✅ Acesso concedido")
             df_agenda = carregar_agenda()
+            st.markdown('<div class="card-title">📖 Agenda Completa</div>', unsafe_allow_html=True)
+
+            colf1, colf2 = st.columns(2)
+            with colf1:
+                data_filtro = st.date_input("Filtrar por data:")
+            with colf2:
+                filtro_servico = st.selectbox("Filtrar por serviço:", ["Todos", servico])
 
             if not df_agenda.empty:
-                data_filtro_str = data_filtro.strftime("%d/%m/%Y")
-                df_filtrado = df_agenda[df_agenda['Data'] == data_filtro_str]
+                data_str = data_filtro.strftime("%d/%m/%Y")
+                filtrado = df_agenda[df_agenda['Data'] == data_str]
+                if filtro_servico != "Todos":
+                    filtrado = filtrado[filtrado['Serviço'] == filtro_servico]
 
-                if not df_filtrado.empty:
-                    st.markdown(
-                        df_filtrado.to_html(index=False, justify='left', classes='dataframe', border=0),
-                        unsafe_allow_html=True
-                    )
+                if not filtrado.empty:
+                    st.dataframe(filtrado, use_container_width=True, hide_index=True)
+                    st.markdown(f"**Total de agendamentos:** {len(filtrado)}")
 
-                    if st.button("Exportar Agenda para Excel"):
-                        with st.spinner("Exportando..."):
-                            df_filtrado.to_excel("agenda_exportada.xlsx", index=False)
-                            st.success("Agenda exportada com sucesso!")
-                            with open("agenda_exportada.xlsx", "rb") as file:
-                                st.download_button(
-                                    label="Baixar Arquivo",
-                                    data=file,
-                                    file_name="agenda_exportada.xlsx",
-                                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                                )
+                    colx1, colx2 = st.columns(2)
+                    with colx1:
+                        if st.button("Exportar para Excel"):
+                            filtrado.to_excel("agenda_exportada.xlsx", index=False)
+                            with open("agenda_exportada.xlsx", "rb") as f:
+                                st.download_button("⬇️ Baixar Excel", f, file_name=f"agenda_{data_str.replace('/', '-')}.xlsx")
+                    with colx2:
+                        if st.button("Exportar para CSV"):
+                            filtrado.to_csv("agenda_exportada.csv", index=False)
+                            with open("agenda_exportada.csv", "rb") as f:
+                                st.download_button("⬇️ Baixar CSV", f, file_name=f"agenda_{data_str.replace('/', '-')}.csv")
                 else:
-                    st.info("Nenhum agendamento encontrado para a data selecionada.")
+                    st.info("ℹ️ Nenhum agendamento encontrado com os filtros selecionados.")
             else:
-                st.info("Nenhum agendamento encontrado.")
+                st.info("ℹ️ Nenhum agendamento cadastrado.")
+        elif senha:
+            st.error("❌ Senha incorreta.")
 
-        elif senha_digitada:
-            st.error("❌ Senha incorreta")
+# === RODAPÉ ===
+st.markdown("""
+    <div style="text-align: center; margin-top: 3rem; color: #666; font-size: 0.9rem;">
+        <hr style="border: 0.5px solid #eee; margin-bottom: 1rem;">
+        <p>© 2025 Auto Truck Proteção Veicular - Todos os direitos reservados</p>
+        <p>Contato: (31) 3370-9888 | Av. José Faria da Rocha, 3772 - Eldorado- Contagem- MG </p>
+    </div>
+""", unsafe_allow_html=True)
+
