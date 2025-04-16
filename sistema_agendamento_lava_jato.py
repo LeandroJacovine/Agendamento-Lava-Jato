@@ -16,7 +16,7 @@ COR_TERCIARIA = "#C73E1D"
 COR_FUNDO = "#F5F5F5"
 COR_TEXTO = "#333333"
 
-# === FUNÇÕES UTILITÁRIAS ===
+# === FUNÇÕES ===
 def criar_arquivo_excel():
     if not os.path.exists(arquivo_excel):
         df = pd.DataFrame(columns=["Data", "Horário", "Nome", "CPF", "Telefone", "Placa", "Modelo", "Serviço"])
@@ -41,6 +41,7 @@ def salvar_agendamento(nome, cpf, telefone, placa, modelo, servico, data, horari
     df.to_excel(arquivo_excel, index=False)
     st.success(f"✅ Agendamento salvo com sucesso para {data} às {horario}!")
 
+# === CANCELAMENTO ===
 def cancelar_agendamento(cpf_cliente):
     df = carregar_agenda()
     df_filtrado = df[df['CPF'] != cpf_cliente]
@@ -154,7 +155,19 @@ with col1:
                 else:
                     salvar_agendamento(nome, cpf, telefone, placa, modelo, servico, data_str, horario)
                     st.balloons()
-                    st.rerun()
+
+                    # ✅ MENSAGEM DE CONFIRMAÇÃO
+                    st.info(f"""
+📝 **Confirmação do Agendamento**
+- 📅 Data: `{data_str}`
+- 🕒 Horário: `{horario}`
+- 🙍‍♂️ Nome: `{nome}`
+- 📞 Telefone: `{telefone}`
+- 🚗 Placa: `{placa}`
+- 🛠️ Serviço: `{servico}`
+
+Se precisar cancelar ou alterar, entre em contato com a nossa equipe.
+""")
 
     with st.container():
         st.markdown('<div class="card-title">❌ Cancelar Agendamento</div>', unsafe_allow_html=True)
@@ -213,7 +226,7 @@ st.markdown("""
     <div style="text-align: center; margin-top: 3rem; color: #666; font-size: 0.9rem;">
         <hr style="border: 0.5px solid #eee; margin-bottom: 1rem;">
         <p>© 2025 Auto Truck Proteção Veicular - Todos os direitos reservados</p>
-        <p>Contato: (31) 3370-9888 | Av. José Faria da Rocha, 3772 - Eldorado- Contagem- MG </p>
+        <p>Contato: (31) 3370-9888 | Whatsapp (31)99302-2405 Av. José Faria da Rocha, 3772 - Eldorado- Contagem- MG </p>
     </div>
 """, unsafe_allow_html=True)
 
